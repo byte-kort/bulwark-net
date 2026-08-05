@@ -9,20 +9,29 @@ fn main() -> std::io::Result<()> {
 
     let listener = UnixListener::bind(path)?;
 
-    println!("waiting for connection...");
+
+    let json = r#"
+    {
+        "code": 123,
+        "cool-word": "chicken"
+    }
+    "#;
+
+    println!("[*] Waiting for connection");
 
     let (mut stream, _) = listener.accept()?;
 
-    println!("go connected!");
+    println!("[+] Server connected");
 
-    let json = r#"
-{
-    "code": "123",
-    "cool-word": "chicken"
-}
-        "#;
+    loop {
+        
+            stream.write_all(json.as_bytes())?;
+            stream.write_all(b"\n")?;
 
-    stream.write_all(json.as_bytes())?;
+            println!("[+] JSON sended");
 
-    Ok(())
+            std::thread::sleep(
+                std::time::Duration::from_secs(2)
+            );
+    }
 }
