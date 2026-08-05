@@ -9,7 +9,6 @@ fn main() -> std::io::Result<()> {
 
     let listener = UnixListener::bind(path)?;
 
-
     let json = r#"
     {
         "code": 123,
@@ -24,14 +23,13 @@ fn main() -> std::io::Result<()> {
     println!("[+] Server connected");
 
     loop {
-        
-            stream.write_all(json.as_bytes())?;
-            stream.write_all(b"\n")?;
+        stream.write_all(json.as_bytes())?;
+        stream.write_all(b"\n")?;
 
-            println!("[+] JSON sended");
+        println!("[+] JSON sended");
 
-            std::thread::sleep(
-                std::time::Duration::from_secs(2)
-            );
+        std::thread::sleep(
+            std::time::Duration::from_secs(2)
+        );
     }
 }
