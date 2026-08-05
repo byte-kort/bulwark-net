@@ -1,9 +1,13 @@
+use std::fs;
 use std::io::Write;
 use std::os::unix::net::UnixListener;
 
 fn main() -> std::io::Result<()> {
-    let listener_path = "/tmp/bulwark.sock";
-    let listener = UnixListener::bind(listener_path)?;
+    let path = "/tmp/bulwark.sock";
+
+    let _ = fs::remove_file(path);
+
+    let listener = UnixListener::bind(path)?;
 
     println!("waiting for connection...");
 
