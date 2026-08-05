@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-type UserData struct {
+type jsonData struct {
 	Code int
 	Coolword string
 }
