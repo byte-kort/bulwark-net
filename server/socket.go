@@ -7,8 +7,8 @@ import (
 )
 
 type jsonData struct {
-	Code int
-	Coolword string
+	Code int `json:"code"` 
+	Coolword string `json:"cool-word"`
 }
 
 func socketandparse() {
