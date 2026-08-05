@@ -14,26 +14,30 @@ type jsonData struct {
 func socketandparse() {
 	socketPath := "/tmp/bulwark.sock"
 
-	fmt.Printf("Connect to socket: %s", socketPath)
+	fmt.Printf("Connect to socket: %s\n", socketPath)
 
 	conn, err := net.Dial("unix", socketPath); 
 	if err != nil{
-		fmt.Printf("\tFailed to connect to the socket: %v\n", err)
+		fmt.Printf("Failed to connect to the socket: %v\n", err)
 		return
 	}
 	defer conn.Close()
 
-	fmt.Printf("[Сервер] Слушаю сокет: %s\n", socketPath)
+	fmt.Printf("listening on the socket %s\n", socketPath)
 	decoder := json.NewDecoder(conn)
 	for {
 		var data jsonData
-
 		err := decoder.Decode(&data)
 		if err != nil{
+			if err.Error() == "EOF"{
+				fmt.Println("End of life server")
+			} else {
+				fmt.Printf("Connection error")
+			}
 			fmt.Printf("error", err)
 			break
 		}
 
-		fmt.Printf("")
+		fmt.Printf("Code: %d, Coolword: %s\n", data.Code, data.Coolword)
 	}
 }
