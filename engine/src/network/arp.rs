@@ -1,3 +1,5 @@
+// Собирает информацию, делает NetworkState::add(state)
+
 use crate::models::device::Device;
 
 pub fn scan() -> Vec<Device> {
