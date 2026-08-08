@@ -1,18 +1,16 @@
-#![allow(unused)]
 use std::net::Ipv4Addr;
 
-use pnet::datalink::{self, NetworkInterface, Channel::Ethernet};
+use pnet::datalink::{self, Channel::Ethernet};
 use pnet::packet::Packet;
 use pnet::packet::arp::{ArpOperations, ArpPacket};
 use pnet::packet::ethernet::{EtherTypes, EthernetPacket};
 
-use crate::network::models::{NetworkState, Device};
+use crate::network::models::Device;
 use crate::network::interface::NetFace;
 use crate::network::frame;
 
 pub fn arp_discovery(
         iface: &NetFace,
-        state: &mut NetworkState,
         target_ip: Ipv4Addr,
         ) -> Result<Device, Box<dyn std::error::Error>> {
 

@@ -14,9 +14,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let iface = NetFace::get_my_iface();
 
     let target_ip = Ipv4Addr::new(8, 8, 8, 8);
-    let device = arp::arp_discovery(&iface, &mut state, target_ip)?;
-
+    let device = arp::arp_discovery(&iface, target_ip)?;
     state.add_device(device);
+
     println!("[MAIN] Device has been added");
 
     Ok(())
