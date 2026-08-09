@@ -1,5 +1,4 @@
 use std::net::Ipv4Addr;
-
 use pnet::util::MacAddr;
 
 #[derive(Debug)]

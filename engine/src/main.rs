@@ -1,23 +1,45 @@
 mod network;
-use std::net::Ipv4Addr;
+mod json_models;
 
-use crate::network::arp;
+use std::io::Write;
+use std::os::unix::net::UnixListener;
+
+use crate::network::arp::{self, generate_ip};
 use crate::network::models::NetworkState;
 use crate::network::interface::NetFace;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-
-    // Создал let state = NetworkState::new();
-    // сделал arp::discovery(&state);
-    
     let mut state = NetworkState::new();
     let iface = NetFace::get_my_iface();
 
-    let target_ip = Ipv4Addr::new(8, 8, 8, 8);
-    let device = arp::arp_discovery(&iface, target_ip)?;
-    state.add_device(device);
+    let targets_ips = generate_ip(&iface);
 
-    println!("[MAIN] Device has been added");
+    let discovery_devices = arp::arp_discovery(&iface, targets_ips)?;
+
+    for device in discovery_devices {
+        println!("IP: {}\nMAC: {}\n", device.ip, device.mac);
+        state.add_device(device);
+    }
+
+    let path = "/tmp/bulwark.sock";
+
+    let _ = std::fs::remove_file(path);
+    let listener = UnixListener::bind(path)?;
+
+    println!("[#] Waiting for connection");
+    let (mut stream, _) = listener.accept()?;
+    println!("[#] Server connected");
+    
+    for device in &state.devices {
+        let event = json_models::DeviceDetected {
+            event: "detected_device",
+            ip: device.ip.to_string(),
+            mac: device.mac.to_string(),
+        };
+        let json = serde_json::to_string(&event)?;
+        stream.write_all(json.as_bytes())?;
+        stream.write_all(b"\n")?;
+    }
 
     Ok(())
 }
