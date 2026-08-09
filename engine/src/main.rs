@@ -12,6 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let path = "/tmp/bulwark.sock";
 
     let _ = std::fs::remove_file(path);
+
     let listener = UnixListener::bind(path)?;
 
     let mut state = NetworkState::new();
@@ -22,14 +23,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let discovery_devices = arp::arp_discovery(&iface, targets_ips)?;
 
     for device in discovery_devices {
-        println!("IP: {}\nMAC: {}\n", device.ip, device.mac);
         state.add_device(device);
     }
 
 
-    println!("[#] Waiting for connection");
     let (mut stream, _) = listener.accept()?;
-    println!("[#] Server connected");
+    println!("[ENGINE] Server connected");
     
     for device in &state.devices {
         let event = json_models::DeviceDetected {
