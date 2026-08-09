@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"time"
 )
 
 type jsonData struct {
@@ -39,14 +40,17 @@ func (j *jsonData) UnmarshalJSON(data []byte) error {
 
 func socketandparse() {
 	socketPath := "/tmp/bulwark.sock"
-
+	conn, err := net.Dial("unix", socketPath); 
+    for{
 	fmt.Printf("Connect to socket: %s\n", socketPath)
 
-	conn, err := net.Dial("unix", socketPath); 
-	if err != nil{
-		fmt.Printf("Failed to connect to the socket: %v\n", err)
-		return
+	if err == nil {
+		break
 	}
+	fmt.Printf("Failed to connect: %v. Retrying...\n", err)
+	time.Sleep(10 * time.Millisecond)
+}
+
 	defer conn.Close()
 
 	fmt.Printf("listening on the socket %s\n", socketPath)
@@ -60,7 +64,7 @@ func socketandparse() {
 			} else {
 				fmt.Printf("Connection error")
 			}
-			fmt.Printf("error", err)
+			fmt.Println("error", err)
 			break
 		}
 
