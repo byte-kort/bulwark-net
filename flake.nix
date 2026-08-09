@@ -24,6 +24,8 @@
           toolchain
           pkgs.gcc
           pkgs.pkg-config
+
+          pkgs.go
         ];
 
         shellHook = ''
