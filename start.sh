@@ -9,10 +9,9 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 echo "[+] Starting Bulwark engine..."
-(
-    cd "$ROOT/engine"
-    cargo run
-) &
+"$ROOT/engine/target/debug/engine" &
+
+ENGINE_PID=$!
 
 echo "[+] Starting Bulwark server..."
 (
@@ -20,14 +19,8 @@ echo "[+] Starting Bulwark server..."
     go run .
 ) &
 
-ENGINE_PID=$!
-
 SERVER_PID=$!
 
 trap 'kill "$ENGINE_PID" "$SERVER_PID" 2>/dev/null' EXIT
-
-echo "[+] Bulwark started"
-echo "[+] Engine PID: $ENGINE_PID"
-echo "[+] Server PID: $SERVER_PID"
 
 wait

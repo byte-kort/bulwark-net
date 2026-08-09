@@ -14,12 +14,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _ = std::fs::remove_file(path);
 
     let listener = UnixListener::bind(path)?;
+    
+    let (mut stream, _) = listener.accept()?;
+    println!("[ENGINE] Server connected");
 
     let mut state = NetworkState::new();
     let iface = NetFace::get_my_iface();
 
     let targets_ips = generate_ip(&iface);
 
+    println!("[ENGINE] Starting ARP discovery");
     let discovery_devices = arp::arp_discovery(&iface, targets_ips)?;
 
     for device in discovery_devices {
@@ -27,8 +31,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
 
-    let (mut stream, _) = listener.accept()?;
-    println!("[ENGINE] Server connected");
     
     for device in &state.devices {
         let event = json_models::DeviceDetected {
