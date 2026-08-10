@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-nix = { version = "0.31.3", features = ["socket", "net"] }
+# nix = { version = "0.31.3", features = ["socket", "net"] }
 pnet = "0.35.0"
-serde = { version = "1.0.229", features = ["derive"]}
+reqwest = { version = "0.13.4" }
 serde_json = "1.0.151"
+serde = { version = "1.0.229", features = ["derive"] }
+tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread"] }

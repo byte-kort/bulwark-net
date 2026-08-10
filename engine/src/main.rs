@@ -1,18 +1,20 @@
 mod network;
 mod json_models;
+mod transport;
 
-use std::io::Write;
-use std::os::unix::net::UnixListener;
+use crate::network::{
+    arp,
+    models::NetworkState,
+    interface::NetFace,
+};
+use crate::transport::sender;
 
-use crate::network::arp::{self, generate_ip};
-use crate::network::models::NetworkState;
-use crate::network::interface::NetFace;
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut state = NetworkState::new();
     let iface = NetFace::get_my_iface();
 
-    let targets_ips = generate_ip(&iface);
+    let targets_ips = arp::generate_ip(&iface);
 
     let discovery_devices = arp::arp_discovery(&iface, targets_ips)?;
 
@@ -20,15 +22,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("IP: {}\nMAC: {}\n", device.ip, device.mac);
         state.add_device(device);
     }
-
-    let path = "/tmp/bulwark.sock";
-
-    let _ = std::fs::remove_file(path);
-    let listener = UnixListener::bind(path)?;
-
-    println!("[#] Waiting for connection");
-    let (mut stream, _) = listener.accept()?;
-    println!("[#] Server connected");
     
     for device in &state.devices {
         let event = json_models::DeviceDetected {
@@ -36,9 +29,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             ip: device.ip.to_string(),
             mac: device.mac.to_string(),
         };
+
         let json = serde_json::to_string(&event)?;
-        stream.write_all(json.as_bytes())?;
-        stream.write_all(b"\n")?;
+        sender::send_json(json).await?;
     }
 
     Ok(())
